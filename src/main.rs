@@ -124,9 +124,10 @@ mod text {
                 Msg::ReturnInput => {
                     let res = self.input.clone();
                     self.input = "".to_owned();
-                    self.return_input.emit(res)
+                    self.return_input.emit(res);
+                    true
                 },
-                Msg::Pass => false,
+                Msg::Pass => true, // why does setting this to true allow refresh?
             }
         }
 
