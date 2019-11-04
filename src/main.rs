@@ -9,6 +9,7 @@ use yew::{
 
 struct Model {
     count: u64,
+    says: String,
 }
 
 enum Msg {
@@ -22,13 +23,18 @@ impl Component for Model {
     fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
         Model {
             count: 0,
+            says: "".to_owned(),
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::IncrementCounter => {
-                self.count += 1;
+                if self.count < 10 {
+                    self.count += 1;
+                } else {
+                    self.says = "can't do more than 10".to_owned();
+                }
                 true
             }
         }
@@ -41,6 +47,7 @@ impl Renderable<Model> for Model {
             <div>
                 <button onclick=|_| Msg::IncrementCounter>{ "Click Me!" }</button>
                 <p>{self.count}</p>
+                <p>{&self.says}</p>
             </div>
         }
     }
