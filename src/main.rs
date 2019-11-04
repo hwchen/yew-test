@@ -3,22 +3,18 @@ use yew::{
     Component,
     ComponentLink,
     Html,
-    IKeyboardEvent,
     Renderable,
     ShouldRender,
 };
 
 struct Model {
     count: u64,
-    input_count: String,
     says: String,
 }
 
 enum Msg {
     IncrementCounter,
-    GetInput(String),
-    SetCounter,
-    Pass,
+    SetCounter(String),
 }
 
 impl Component for Model {
@@ -28,7 +24,6 @@ impl Component for Model {
     fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
         Model {
             count: 0,
-            input_count: "".to_owned(),
             says: "".to_owned(),
         }
     }
@@ -43,16 +38,12 @@ impl Component for Model {
                 }
                 true
             }
-            Msg::GetInput(n_str) => {
-                self.input_count = n_str;
-                false
-            }
-            Msg::SetCounter => {
-                match self.input_count.parse() {
+            Msg::SetCounter(n_str) => {
+                match n_str.parse() {
                     Ok(n) => {
                         if n <= 10 {
                             self.count = n;
-                            self.input_count = "".to_owned();
+                            self.says = "".to_owned();
                         } else {
                             self.says = "can't set more than 10".to_owned();
                         }
@@ -63,7 +54,6 @@ impl Component for Model {
                 }
                 true
             }
-            Msg::Pass => false,
         }
     }
 }
@@ -76,14 +66,85 @@ impl Renderable<Model> for Model {
                 <p>{self.count}</p>
                 <div>
                     <p>{ "Enter a number below to set counter" }</p>
-                    <input
-                        value=&self.input_count
-                        oninput=|e| Msg::GetInput(e.value)
-                        onkeyup=|e| if e.key() == "Enter" { Msg::SetCounter } else { Msg::Pass }
-                    />
+                    <text::TextInput return_input=|txt| Msg::SetCounter(txt) />
                 </div>
                 <p>{&self.says}</p>
             </div>
+        }
+    }
+}
+
+mod text {
+    use yew::{
+        html,
+        Callback,
+        Component,
+        ComponentLink,
+        Html,
+        IKeyboardEvent,
+        Properties,
+        Renderable,
+        ShouldRender,
+    };
+
+    pub struct TextInput {
+        input: String,
+        return_input: Callback<String>,
+    }
+
+    pub enum Msg {
+        GetInput(String),
+        ReturnInput,
+        Pass,
+    }
+
+    #[derive(Properties, PartialEq)]
+    pub struct Props {
+        #[props(required)]
+        pub return_input: Callback<String>,
+    }
+
+    impl Component for TextInput {
+        type Message = Msg;
+        type Properties = Props;
+
+        fn create(props: Self::Properties, _: ComponentLink<Self>) -> Self {
+            Self {
+                input: "".into(),
+                return_input: props.return_input,
+            }
+        }
+
+        fn update(&mut self, msg: Self::Message) -> ShouldRender {
+            match msg {
+                Msg::GetInput(input) => {
+                    self.input = input;
+                    false
+                }
+                Msg::ReturnInput => {
+                    let res = self.input.clone();
+                    self.input = "".to_owned();
+                    self.return_input.emit(res)
+                },
+                Msg::Pass => false,
+            }
+        }
+
+        fn change(&mut self, props: Self::Properties) -> ShouldRender {
+            self.return_input = props.return_input;
+            true
+        }
+    }
+
+    impl Renderable<TextInput> for TextInput {
+        fn view(&self) -> Html<Self> {
+            html! {
+                <input
+                    value=&self.input
+                    oninput=|e| Msg::GetInput(e.value)
+                    onkeyup=|e| if e.key() == "Enter" { Msg::ReturnInput } else { Msg::Pass }
+                />
+            }
         }
     }
 }
