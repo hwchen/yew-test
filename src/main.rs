@@ -3,7 +3,6 @@ use yew::{
     Component,
     ComponentLink,
     Html,
-    Renderable,
     ShouldRender,
 };
 
@@ -56,9 +55,7 @@ impl Component for Model {
             }
         }
     }
-}
 
-impl Renderable<Model> for Model {
     fn view(&self) -> Html<Self> {
         html! {
             <div>
@@ -83,7 +80,6 @@ mod text {
         Html,
         IKeyboardEvent,
         Properties,
-        Renderable,
         ShouldRender,
     };
 
@@ -127,7 +123,7 @@ mod text {
                     self.return_input.emit(res);
                     true
                 },
-                Msg::Pass => true, // why does setting this to true allow refresh?
+                Msg::Pass => false,
             }
         }
 
@@ -135,9 +131,7 @@ mod text {
             self.return_input = props.return_input;
             true
         }
-    }
 
-    impl Renderable<TextInput> for TextInput {
         fn view(&self) -> Html<Self> {
             html! {
                 <input
